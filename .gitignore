@@ -1,0 +1,36 @@
+# Compiled class files & build directories
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+
+# Node dependencies & builds
+**/node_modules/
+**/dist/
+**/.vite/
+frontend/.env
+frontend/.env.local
+
+# Python virtual environment & cache
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/.pytest_cache/
+
+# IDE & Editor files
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Vercel & Deployment
+.vercel/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+*.log

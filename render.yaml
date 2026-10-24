@@ -1,0 +1,30 @@
+services:
+  # 1. Python FastAPI Machine Learning Microservice
+  - type: web
+    name: finsight-ml-service
+    runtime: docker
+    dockerfilePath: ./ml-service/Dockerfile
+    dockerContext: ./ml-service
+    plan: free
+    region: oregon
+    healthCheckPath: /
+    autoDeploy: true
+
+  # 2. Spring Boot Core Backend API
+  - type: web
+    name: finsight-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      - key: SPRING_DATA_MONGODB_URI
+        sync: false # Set this in Render dashboard to your MongoDB Atlas connection string
+      - key: FINSIGHT_ML_SERVICE_URL
+        fromService:
+          type: web
+          name: finsight-ml-service
+          property: host
