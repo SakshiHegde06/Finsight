@@ -33,22 +33,25 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("[*] Checking FinSight database state...");
+        try {
+            // 1. Purge legacy demo transactions so dashboard starts with only user transactions
+            int cleaned = transactionService.clearDemoData();
+            if (cleaned > 0) {
+                log.info("[✓] Removed {} legacy demo transactions from database.", cleaned);
+            }
 
-        // 1. Purge legacy demo transactions so dashboard starts with only user transactions
-        int cleaned = transactionService.clearDemoData();
-        if (cleaned > 0) {
-            log.info("[✓] Removed {} legacy demo transactions from database.", cleaned);
+            // 2. Clear pre-seeded static dummy insights
+            insightRepository.deleteAll();
+            log.info("[✓] Cleared legacy static dummy insights.");
+
+            // 3. Ensure budgets are initialized for the active month
+            LocalDate today = LocalDate.now();
+            String currentMonthYear = today.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            budgetService.getBudgetsForMonth(currentMonthYear);
+
+            log.info("[✓] FinSight ready with 100% live, dynamic user metrics.");
+        } catch (Exception e) {
+            log.error("[!] Warning: Initial database check failed: {}. Please verify SPRING_DATA_MONGODB_URI in Render Environment variables.", e.getMessage());
         }
-
-        // 2. Clear pre-seeded static dummy insights
-        insightRepository.deleteAll();
-        log.info("[✓] Cleared legacy static dummy insights.");
-
-        // 3. Ensure budgets are initialized for the active month
-        LocalDate today = LocalDate.now();
-        String currentMonthYear = today.format(DateTimeFormatter.ofPattern("yyyy-MM"));
-        budgetService.getBudgetsForMonth(currentMonthYear);
-
-        log.info("[✓] FinSight ready with 100% live, dynamic user metrics.");
     }
 }
