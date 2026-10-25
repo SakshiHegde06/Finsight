@@ -3,11 +3,22 @@ import { X, Sparkles, Check } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function AddTransactionModal({ isOpen, onClose, onSave, editingTransaction }) {
+  const getTodayStr = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = getTodayStr();
+
   const [description, setDescription] = useState('');
   const [merchant, setMerchant] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('shopping');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(todayStr);
+  const [dateError, setDateError] = useState('');
   const [type, setType] = useState('EXPENSE');
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [aiPrediction, setAiPrediction] = useState(null);
@@ -52,25 +63,38 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
     }
   };
 
+  const handleDateChange = (val) => {
+    if (val > todayStr) {
+      setDate(todayStr);
+      setDateError(`Transactions cannot be set in the future. Maximum date is today (${todayStr}).`);
+    } else {
+      setDate(val);
+      setDateError('');
+    }
+  };
+
   useEffect(() => {
     if (editingTransaction) {
       setDescription(editingTransaction.description || '');
       setMerchant(editingTransaction.merchant || '');
       setAmount(editingTransaction.amount ? String(editingTransaction.amount) : '');
       setCategory(editingTransaction.category || (editingTransaction.type === 'INCOME' ? 'salary' : 'shopping'));
-      setDate(editingTransaction.date || new Date().toISOString().split('T')[0]);
+      const editDate = editingTransaction.date || todayStr;
+      setDate(editDate > todayStr ? todayStr : editDate);
       setType(editingTransaction.type || 'EXPENSE');
       setPaymentMethod(editingTransaction.paymentMethod || 'UPI');
       setAiPrediction(null);
+      setDateError('');
     } else {
       setDescription('');
       setMerchant('');
       setAmount('');
       setCategory('shopping');
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(todayStr);
       setType('EXPENSE');
       setPaymentMethod('UPI');
       setAiPrediction(null);
+      setDateError('');
     }
   }, [editingTransaction, isOpen]);
 
@@ -101,6 +125,11 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!description.trim() || !amount || isSubmitting) return;
+
+    if (date > todayStr) {
+      setDateError(`Transactions cannot be set in the future. Maximum allowed date is today (${todayStr}).`);
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -264,14 +293,24 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
               </select>
             </div>
             <div>
-              <label className="input-label">Date</label>
+              <label className="input-label">Date (Past or Today) *</label>
               <input
                 type="date"
                 className="input-field"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                max={todayStr}
+                onChange={(e) => handleDateChange(e.target.value)}
                 required
               />
+              {dateError ? (
+                <span style={{ fontSize: '0.72rem', color: '#DC2626', marginTop: 4, display: 'block', fontWeight: 500 }}>
+                  {dateError}
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>
+                  Max allowed: Today ({todayStr})
+                </span>
+              )}
             </div>
           </div>
 

@@ -57,6 +57,9 @@ public class TransactionService {
         }
 
         LocalDate txDate = request.getDate() != null ? request.getDate() : LocalDate.now();
+        if (txDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Transaction date cannot be in the future (latest allowed date is " + LocalDate.now() + ")");
+        }
 
         Transaction transaction = Transaction.builder()
                 .description(request.getDescription())
@@ -111,6 +114,9 @@ public class TransactionService {
                 existing.setMerchant(request.getMerchant());
             }
             if (request.getDate() != null) {
+                if (request.getDate().isAfter(LocalDate.now())) {
+                    throw new IllegalArgumentException("Transaction date cannot be in the future (latest allowed date is " + LocalDate.now() + ")");
+                }
                 existing.setDate(request.getDate());
             }
             if (request.getType() != null) {
