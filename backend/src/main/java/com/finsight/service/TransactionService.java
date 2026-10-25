@@ -132,7 +132,11 @@ public class TransactionService {
     public boolean deleteTransaction(String id) {
         return transactionRepository.findById(id).map(tx -> {
             transactionRepository.delete(tx);
-            updateBudgetSpending(tx.getCategory(), tx.getDate());
+            try {
+                updateBudgetSpending(tx.getCategory(), tx.getDate());
+            } catch (Exception e) {
+                log.warn("Non-fatal: could not update budget spending after delete: {}", e.getMessage());
+            }
             return true;
         }).orElse(false);
     }
