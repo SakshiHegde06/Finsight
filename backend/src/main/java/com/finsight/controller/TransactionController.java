@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
@@ -35,9 +40,21 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody TransactionRequest request) {
-        Transaction created = transactionService.createTransaction(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<?> createTransaction(@Valid @RequestBody TransactionRequest request) {
+        try {
+            Transaction created = transactionService.createTransaction(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (Throwable e) {
+            log.error("Failed to create transaction: ", e);
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String stack = sw.toString();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "error", e.getClass().getName(),
+                "message", e.getMessage() != null ? e.getMessage() : "null",
+                "trace", stack.substring(0, Math.min(1000, stack.length()))
+            ));
+        }
     }
 
     @PutMapping("/{id}")
