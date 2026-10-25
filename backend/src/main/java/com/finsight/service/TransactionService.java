@@ -73,17 +73,25 @@ public class TransactionService {
 
         // Perform ML Anomaly Detection if it is an expense
         if (!"INCOME".equalsIgnoreCase(transaction.getType())) {
-            List<Transaction> history = transactionRepository.findByCategoryOrderByDateDesc(transaction.getCategory());
-            MlAnomalyResponseDTO anomalyResult = mlServiceClient.detectAnomaly(transaction, history);
-            if (anomalyResult != null) {
-                transaction.setIsAnomaly(anomalyResult.getIsAnomaly());
-                transaction.setAnomalyScore(anomalyResult.getAnomalyScore());
-                transaction.setAnomalyReason(anomalyResult.getReason());
+            try {
+                List<Transaction> history = transactionRepository.findByCategoryOrderByDateDesc(transaction.getCategory());
+                MlAnomalyResponseDTO anomalyResult = mlServiceClient.detectAnomaly(transaction, history);
+                if (anomalyResult != null) {
+                    transaction.setIsAnomaly(anomalyResult.getIsAnomaly());
+                    transaction.setAnomalyScore(anomalyResult.getAnomalyScore());
+                    transaction.setAnomalyReason(anomalyResult.getReason());
+                }
+            } catch (Exception e) {
+                log.warn("Anomaly check non-fatal error: {}", e.getMessage());
             }
         }
 
         Transaction saved = transactionRepository.save(transaction);
-        updateBudgetSpending(saved.getCategory(), txDate);
+        try {
+            updateBudgetSpending(saved.getCategory(), txDate);
+        } catch (Exception e) {
+            log.warn("Budget spending update non-fatal error: {}", e.getMessage());
+        }
 
         return saved;
     }
@@ -155,21 +163,33 @@ public class TransactionService {
 
     public void updateBudgetSpending(String category, LocalDate date) {
         if (category == null || date == null) return;
-        String monthYear = date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        try {
+            String monthYear = date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
 
-        LocalDate start = date.withDayOfMonth(1);
-        LocalDate end = date.withDayOfMonth(date.lengthOfMonth());
+            LocalDate start = date.withDayOfMonth(1);
+            LocalDate end = date.withDayOfMonth(date.lengthOfMonth());
 
-        List<Transaction> monthCatTxs = transactionRepository.findByDateBetweenOrderByDateDesc(start, end);
-        double totalSpent = monthCatTxs.stream()
-                .filter(t -> category.equalsIgnoreCase(t.getCategory()) && !"INCOME".equalsIgnoreCase(t.getType()))
-                .mapToDouble(t -> t.getAmount() != null ? t.getAmount() : 0.0)
-                .sum();
+            List<Transaction> monthCatTxs = transactionRepository.findByDateBetweenOrderByDateDesc(start, end);
+            double totalSpent = monthCatTxs.stream()
+                    .filter(t -> category.equalsIgnoreCase(t.getCategory()) && !"INCOME".equalsIgnoreCase(t.getType()))
+                    .mapToDouble(t -> t.getAmount() != null ? t.getAmount() : 0.0)
+                    .sum();
 
-        budgetRepository.findByCategoryAndMonthYear(category.toLowerCase(), monthYear).ifPresent(b -> {
-            b.setSpentAmount(totalSpent);
-            budgetRepository.save(b);
-        });
+            List<Budget> budgets = budgetRepository.findByCategoryAndMonthYear(category.toLowerCase(), monthYear);
+            if (!budgets.isEmpty()) {
+                Budget primary = budgets.get(0);
+                primary.setSpentAmount(totalSpent);
+                budgetRepository.save(primary);
+
+                if (budgets.size() > 1) {
+                    for (int i = 1; i < budgets.size(); i++) {
+                        budgetRepository.delete(budgets.get(i));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Non-fatal error updating budget spending for {}: {}", category, e.getMessage());
+        }
     }
 
     public int clearDemoData() {

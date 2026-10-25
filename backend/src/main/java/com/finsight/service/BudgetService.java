@@ -34,6 +34,8 @@ public class BudgetService {
         List<Budget> budgets = budgetRepository.findByMonthYear(targetMonthYear);
         if (budgets.isEmpty()) {
             budgets = initializeDefaultBudgets(targetMonthYear);
+        } else {
+            deduplicateBudgets(budgets);
         }
 
         recalculateBudgetSpending(targetMonthYear);
@@ -44,13 +46,18 @@ public class BudgetService {
         String cat = request.getCategory().toLowerCase();
         String my = request.getMonthYear();
 
-        Optional<Budget> existing = budgetRepository.findByCategoryAndMonthYear(cat, my);
+        List<Budget> existingList = budgetRepository.findByCategoryAndMonthYear(cat, my);
         Budget budget;
-        if (existing.isPresent()) {
-            budget = existing.get();
+        if (!existingList.isEmpty()) {
+            budget = existingList.get(0);
             budget.setAllocatedAmount(request.getAllocatedAmount());
             if (request.getColor() != null) budget.setColor(request.getColor());
             if (request.getAlertThreshold() != null) budget.setAlertThreshold(request.getAlertThreshold());
+            if (existingList.size() > 1) {
+                for (int i = 1; i < existingList.size(); i++) {
+                    budgetRepository.delete(existingList.get(i));
+                }
+            }
         } else {
             budget = Budget.builder()
                     .category(cat)
@@ -66,6 +73,22 @@ public class BudgetService {
         Budget saved = budgetRepository.save(budget);
         recalculateBudgetSpending(my);
         return saved;
+    }
+
+    private void deduplicateBudgets(List<Budget> budgets) {
+        java.util.Map<String, Budget> seen = new java.util.HashMap<>();
+        java.util.List<Budget> duplicates = new java.util.ArrayList<>();
+        for (Budget b : budgets) {
+            String key = b.getCategory() != null ? b.getCategory().toLowerCase() : "";
+            if (seen.containsKey(key)) {
+                duplicates.add(b);
+            } else {
+                seen.put(key, b);
+            }
+        }
+        if (!duplicates.isEmpty()) {
+            budgetRepository.deleteAll(duplicates);
+        }
     }
 
     public boolean deleteBudget(String id) {

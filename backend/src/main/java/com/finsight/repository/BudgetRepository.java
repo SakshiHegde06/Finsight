@@ -12,5 +12,5 @@ public interface BudgetRepository extends MongoRepository<Budget, String> {
 
     List<Budget> findByMonthYear(String monthYear);
 
-    Optional<Budget> findByCategoryAndMonthYear(String category, String monthYear);
+    List<Budget> findByCategoryAndMonthYear(String category, String monthYear);
 }
