@@ -142,10 +142,16 @@ public class MlServiceClient {
         if (mlServiceUrl == null || mlServiceUrl.isBlank()) {
             return "http://localhost:8000/api/ml";
         }
-        String clean = mlServiceUrl.trim();
-        if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
-            clean = "http://" + clean;
+        String clean = mlServiceUrl.trim().replaceAll("\\s+", "");
+        if (clean.contains("finsight-ml-service") && !clean.contains(".onrender.com")) {
+            clean = clean.replaceFirst("^https?://", "");
+            clean = "https://" + clean + ".onrender.com";
+        } else if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+            clean = clean.contains("onrender.com") ? "https://" + clean : "http://" + clean;
+        } else if (clean.contains("onrender.com") && clean.startsWith("http://")) {
+            clean = "https://" + clean.substring(7);
         }
+
         while (clean.endsWith("/")) {
             clean = clean.substring(0, clean.length() - 1);
         }
