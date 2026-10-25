@@ -173,7 +173,13 @@ public class MlServiceClient {
         String cat = "shopping";
         String disp = "Shopping";
 
-        if (lower.contains("hospital") || lower.contains("pharmacy") || lower.contains("doctor") || lower.contains("medical") 
+        if (lower.contains("salary") || lower.contains("payroll") || lower.contains("stipend") || lower.contains("wages")) {
+            cat = "salary";
+            disp = "Salary / Wages";
+        } else if (lower.contains("freelance") || lower.contains("consulting")) {
+            cat = "freelance";
+            disp = "Freelance & Consulting";
+        } else if (lower.contains("hospital") || lower.contains("pharmacy") || lower.contains("doctor") || lower.contains("medical") 
                 || lower.contains("fever") || lower.contains("cough") || lower.contains("cold") || lower.contains("medicine") 
                 || lower.contains("paracetamol") || lower.contains("dolo") || lower.contains("tablet") || lower.contains("clinic")) {
             cat = "healthcare";

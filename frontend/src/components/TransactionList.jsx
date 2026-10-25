@@ -27,6 +27,10 @@ export default function TransactionList({
 
   const categoriesList = [
     { id: 'all', label: 'All Categories' },
+    { id: 'salary', label: 'Salary / Wages' },
+    { id: 'freelance', label: 'Freelance & Consulting' },
+    { id: 'business', label: 'Business Income' },
+    { id: 'bonus', label: 'Bonus & Grants' },
     { id: 'food', label: 'Food & Dining' },
     { id: 'shopping', label: 'Shopping' },
     { id: 'travel', label: 'Travel' },
@@ -73,6 +77,11 @@ export default function TransactionList({
 
   const getCategoryBadgeClass = (cat) => {
     switch (cat?.toLowerCase()) {
+      case 'salary': return 'badge-forest';
+      case 'freelance': return 'badge-navy';
+      case 'business': return 'badge-purple';
+      case 'bonus': return 'badge-amber';
+      case 'rental': return 'badge-forest';
       case 'food': return 'badge-amber';
       case 'travel': return 'badge-navy';
       case 'shopping': return 'badge-purple';

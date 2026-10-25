@@ -41,6 +41,11 @@ export default function ExpenseCharts({ categories, trends, forecast, budgets })
 
   // Luxury Cream Harmonious Palette for Categories
   const categoryPalette = {
+    salary: '#059669',        // Rich Emerald Green
+    freelance: '#0891B2',     // Vivid Cyan
+    business: '#2563EB',      // Royal Blue
+    bonus: '#D97706',         // Gold Amber
+    rental: '#16A34A',        // Green
     food: '#D97706',          // Warm Amber
     shopping: '#8B5CF6',      // Elegant Violet
     travel: '#0284C7',        // Ocean Blue
@@ -49,7 +54,8 @@ export default function ExpenseCharts({ categories, trends, forecast, budgets })
     entertainment: '#EC4899', // Berry Rose
     healthcare: '#E11D48',    // Crimson
     investment: '#15803D',    // Forest Green
-    education: '#2563EB'      // Indigo
+    education: '#2563EB',     // Indigo
+    other: '#64748B'          // Slate
   };
 
   // 1. Doughnut Chart

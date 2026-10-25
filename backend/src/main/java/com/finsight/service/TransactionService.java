@@ -228,6 +228,11 @@ public class TransactionService {
     private String formatDisplayCategory(String cat) {
         if (cat == null) return "General";
         switch (cat.toLowerCase()) {
+            case "salary": return "Salary / Wages";
+            case "freelance": return "Freelance & Consulting";
+            case "business": return "Business Income";
+            case "bonus": return "Bonus & Grants";
+            case "rental": return "Rental Income";
             case "food": return "Food & Dining";
             case "travel": return "Travel & Commute";
             case "shopping": return "Shopping";

@@ -13,7 +13,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
   const [aiPrediction, setAiPrediction] = useState(null);
   const [isPredicting, setIsPredicting] = useState(false);
 
-  const categories = [
+  const expenseCategories = [
     { id: 'food', label: 'Food & Dining' },
     { id: 'shopping', label: 'Shopping' },
     { id: 'travel', label: 'Travel & Commute' },
@@ -22,17 +22,41 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
     { id: 'entertainment', label: 'Entertainment' },
     { id: 'healthcare', label: 'Healthcare' },
     { id: 'investment', label: 'Investments' },
-    { id: 'education', label: 'Education' }
+    { id: 'education', label: 'Education' },
+    { id: 'other', label: 'Other Expense' }
   ];
 
+  const incomeCategories = [
+    { id: 'salary', label: 'Salary / Wages' },
+    { id: 'freelance', label: 'Freelance & Consulting' },
+    { id: 'investment', label: 'Investments & Dividends' },
+    { id: 'business', label: 'Business Income' },
+    { id: 'rental', label: 'Rental Income' },
+    { id: 'bonus', label: 'Bonus & Grants' },
+    { id: 'other', label: 'Other Income' }
+  ];
+
+  const activeCategories = type === 'INCOME' ? incomeCategories : expenseCategories;
+
   const paymentMethods = ['UPI', 'Credit Card', 'Net Banking', 'Debit Card', 'Cash'];
+
+  const handleTypeChange = (newType) => {
+    setType(newType);
+    if (newType === 'INCOME') {
+      const isIncome = incomeCategories.some(c => c.id === category);
+      if (!isIncome) setCategory('salary');
+    } else {
+      const isExpense = expenseCategories.some(c => c.id === category);
+      if (!isExpense) setCategory('shopping');
+    }
+  };
 
   useEffect(() => {
     if (editingTransaction) {
       setDescription(editingTransaction.description || '');
       setMerchant(editingTransaction.merchant || '');
       setAmount(editingTransaction.amount ? String(editingTransaction.amount) : '');
-      setCategory(editingTransaction.category || 'shopping');
+      setCategory(editingTransaction.category || (editingTransaction.type === 'INCOME' ? 'salary' : 'shopping'));
       setDate(editingTransaction.date || new Date().toISOString().split('T')[0]);
       setType(editingTransaction.type || 'EXPENSE');
       setPaymentMethod(editingTransaction.paymentMethod || 'UPI');
@@ -119,7 +143,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
           <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
             <button
               type="button"
-              onClick={() => setType('EXPENSE')}
+              onClick={() => handleTypeChange('EXPENSE')}
               style={{
                 flex: 1,
                 padding: '9px',
@@ -136,7 +160,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
             </button>
             <button
               type="button"
-              onClick={() => setType('INCOME')}
+              onClick={() => handleTypeChange('INCOME')}
               style={{
                 flex: 1,
                 padding: '9px',
@@ -159,7 +183,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
             <input
               type="text"
               className="input-field"
-              placeholder="e.g. Uber ride to airport INR 650 TXN09..."
+              placeholder={type === 'INCOME' ? "e.g. Monthly Salary credit TCS, Freelance client transfer..." : "e.g. Uber ride to airport INR 650, Swiggy dinner..."}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
@@ -204,11 +228,11 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
               />
             </div>
             <div>
-              <label className="input-label">Merchant / Payee</label>
+              <label className="input-label">{type === 'INCOME' ? 'Source / Employer / Client' : 'Merchant / Payee'}</label>
               <input
                 type="text"
                 className="input-field"
-                placeholder="e.g. Swiggy, Netflix, Uber"
+                placeholder={type === 'INCOME' ? "e.g. Employer Name, Client, Google" : "e.g. Swiggy, Netflix, Uber"}
                 value={merchant}
                 onChange={(e) => setMerchant(e.target.value)}
               />
@@ -224,7 +248,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
-                {categories.map(c => (
+                {activeCategories.map(c => (
                   <option key={c.id} value={c.id}>
                     {c.label}
                   </option>

@@ -9,6 +9,11 @@ from typing import Dict, Any, List, Optional
 from app.training.train_models import MODEL_PATH, train_and_save_model
 
 TAG_MAPPING = {
+    "salary": ["income", "salary", "payroll", "wages", "earnings"],
+    "freelance": ["income", "freelance", "gig", "contract", "consulting"],
+    "business": ["income", "revenue", "sales", "client"],
+    "bonus": ["income", "bonus", "grant", "reward"],
+    "rental": ["income", "rent", "tenant", "lease"],
     "food": ["food", "dining", "restaurant", "takeout"],
     "travel": ["commute", "travel", "rideshare", "transit"],
     "shopping": ["retail", "ecommerce", "shopping", "goods"],
@@ -21,6 +26,11 @@ TAG_MAPPING = {
 }
 
 DISPLAY_NAMES = {
+    "salary": "Salary / Wages",
+    "freelance": "Freelance & Consulting",
+    "business": "Business Income",
+    "bonus": "Bonus & Grants",
+    "rental": "Rental Income",
     "food": "Food & Dining",
     "travel": "Travel & Commute",
     "shopping": "Shopping",
@@ -75,6 +85,17 @@ class CategorizerService:
         # Comprehensive Rule Refinements
         lower = text.lower()
         if any(w in lower for w in [
+            "salary", "payroll", "stipend", "wages", "salary credit", "employer",
+            "tcs", "infosys", "wipro", "google payroll", "microsoft payroll"
+        ]):
+            raw_category = "salary"
+            confidence = max(confidence, 0.99)
+        elif any(w in lower for w in [
+            "freelance", "upwork", "fiverr", "client payment", "consulting fee"
+        ]):
+            raw_category = "freelance"
+            confidence = max(confidence, 0.98)
+        elif any(w in lower for w in [
             "fever", "cough", "cold", "flu", "headache", "paracetamol", "dolo", "crocin", 
             "medicine", "tablets", "syrup", "capsule", "antibiotic", "painkiller", "prescription",
             "hospital", "clinic", "doctor", "dr.", "physician", "patient", "consultation",
