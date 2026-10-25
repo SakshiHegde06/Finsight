@@ -64,14 +64,18 @@ class RecommenderService:
         score = 0
         # Metric A: Savings rate (up to 35 pts)
         if income > 0:
-            if savings_rate >= 25:
+            if total_expense > income:
+                score += 0
+            elif savings_rate >= 25:
                 score += 35
             elif savings_rate >= 15:
                 score += 25
             elif savings_rate >= 5:
                 score += 15
-            else:
+            elif savings_rate > 0:
                 score += 5
+            else:
+                score += 2
         else:
             score += 15
             
@@ -277,7 +281,29 @@ class RecommenderService:
                     "message": f"Your current savings rate is {savings_rate}%. Setting up an automated recurring transfer of ₹{target_boost:,.0f} into an SIP or savings fund will push you toward the 20% benchmark standard.",
                     "potential_savings": target_boost,
                     "action": "Boost Monthly SIP"
+            if total_expense > income:
+                deficit = total_expense - income
+                recommendations.insert(0, {
+                    "id": str(uuid.uuid4()),
+                    "type": "WARNING",
+                    "severity": "CRITICAL",
+                    "title": f"Cash Flow Deficit Alert: -₹{deficit:,.0f} Overspend",
+                    "message": f"Your spending (₹{total_expense:,.0f}) has exceeded your monthly income (₹{income:,.0f}) by ₹{deficit:,.0f}. You are operating at a net deficit, accumulating debt or depleting savings reserves. An immediate spending freeze on non-essentials is strongly advised.",
+                    "potential_savings": round(deficit, 2),
+                    "action": "Freeze Discretionary Spend"
                 })
+                insights.append(f"Spending exceeds monthly income by ₹{deficit:,.0f} (Net Cash Deficit).")
+            elif total_expense == income:
+                recommendations.insert(0, {
+                    "id": str(uuid.uuid4()),
+                    "type": "WARNING",
+                    "severity": "HIGH",
+                    "title": "Zero Savings Alert: 100% Income Depleted",
+                    "message": f"You have spent 100% of your ₹{income:,.0f} monthly income (₹0 remaining). Operating with zero savings buffer leaves you highly vulnerable to unforeseen emergencies. Trim non-essential expenses to restore a 15–20% cushion.",
+                    "potential_savings": round(income * 0.15, 2),
+                    "action": "Build Emergency Buffer"
+                })
+                insights.append("100% of monthly income consumed with 0% savings rate.")
         elif total_expense > 0:
             insights.append(f"Recorded ₹{total_expense:,.0f} across {len(transactions)} active transactions. Add income to unlock full 50/30/20 budget analysis.")
 

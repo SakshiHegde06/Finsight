@@ -130,7 +130,7 @@ public class MlServiceClient {
             return restTemplate.postForObject(url, entity, MlRecommendationResponseDTO.class);
         } catch (Exception e) {
             log.warn("ML Service unavailable for recommendations: {}", e.getMessage());
-            return fallbackRecommendations(transactions);
+            return fallbackRecommendations(income, transactions, budgets);
         }
     }
 
@@ -253,24 +253,103 @@ public class MlServiceClient {
                 .build();
     }
 
-    private MlRecommendationResponseDTO fallbackRecommendations(List<Transaction> transactions) {
+    private MlRecommendationResponseDTO fallbackRecommendations(Double income, List<Transaction> transactions, List<Budget> budgets) {
+        double inc = income != null ? income : 0.0;
+        double totalSpend = 0.0;
+        Map<String, Double> spendByCat = new HashMap<>();
+
+        if (transactions != null) {
+            for (Transaction t : transactions) {
+                if (!"INCOME".equalsIgnoreCase(t.getType())) {
+                    double amt = t.getAmount() != null ? t.getAmount() : 0.0;
+                    totalSpend += amt;
+                    String cat = t.getCategory() != null ? t.getCategory().toLowerCase() : "miscellaneous";
+                    spendByCat.put(cat, spendByCat.getOrDefault(cat, 0.0) + amt);
+                }
+            }
+        }
+
+        double savingsRate = inc > 0 ? Math.max(0.0, ((inc - totalSpend) / inc) * 100.0) : 0.0;
         List<Map<String, Object>> recs = new ArrayList<>();
-        Map<String, Object> r1 = new HashMap<>();
-        r1.put("id", UUID.randomUUID().toString());
-        r1.put("type", "SAVINGS");
-        r1.put("severity", "INFO");
-        r1.put("title", "Optimize Food & Takeout Spend");
-        r1.put("message", "Switching 2 restaurant/takeout orders per week to home cooking can save approximately INR 3,500/month.");
-        r1.put("potential_savings", 3500.0);
-        r1.put("action", "Adjust Dining Budget");
-        recs.add(r1);
+        List<String> summaryInsights = new ArrayList<>();
+
+        if (inc > 0 && totalSpend > inc) {
+            double deficit = totalSpend - inc;
+            Map<String, Object> r = new HashMap<>();
+            r.put("id", UUID.randomUUID().toString());
+            r.put("type", "WARNING");
+            r.put("severity", "CRITICAL");
+            r.put("title", "Cash Flow Deficit Alert: -₹" + String.format("%.0f", deficit) + " Overspend");
+            r.put("message", "Your spending (₹" + String.format("%.0f", totalSpend) + ") exceeds your income (₹" + String.format("%.0f", inc) + ") by ₹" + String.format("%.0f", deficit) + ". Immediate spending freeze recommended.");
+            r.put("potential_savings", deficit);
+            r.put("action", "Freeze Discretionary Spend");
+            recs.add(r);
+            summaryInsights.add("Spending exceeds monthly income by ₹" + String.format("%.0f", deficit) + ".");
+        } else if (inc > 0 && totalSpend == inc) {
+            Map<String, Object> r = new HashMap<>();
+            r.put("id", UUID.randomUUID().toString());
+            r.put("type", "WARNING");
+            r.put("severity", "HIGH");
+            r.put("title", "Zero Savings Alert: 100% Income Depleted");
+            r.put("message", "You have spent 100% of your ₹" + String.format("%.0f", inc) + " income with ₹0 remaining. Build an emergency cushion.");
+            r.put("potential_savings", inc * 0.15);
+            r.put("action", "Build Emergency Buffer");
+            recs.add(r);
+        }
+
+        if (budgets != null) {
+            for (Budget b : budgets) {
+                String cat = b.getCategory() != null ? b.getCategory().toLowerCase() : "";
+                double allocated = b.getAllocatedAmount() != null ? b.getAllocatedAmount() : 0.0;
+                double spent = spendByCat.getOrDefault(cat, b.getSpentAmount() != null ? b.getSpentAmount() : 0.0);
+                if (allocated > 0 && spent >= allocated) {
+                    double over = spent - allocated;
+                    Map<String, Object> r = new HashMap<>();
+                    r.put("id", UUID.randomUUID().toString());
+                    r.put("type", "WARNING");
+                    r.put("severity", "HIGH");
+                    String disp = b.getDisplayCategory() != null ? b.getDisplayCategory() : cat;
+                    r.put("title", "Budget Exceeded in " + disp);
+                    r.put("message", "Exceeded limit by ₹" + String.format("%.0f", over) + " (spent ₹" + String.format("%.0f", spent) + " of ₹" + String.format("%.0f", allocated) + ").");
+                    r.put("potential_savings", over);
+                    r.put("action", "Adjust " + disp + " Budget");
+                    recs.add(r);
+                }
+            }
+        }
+
+        int score = 0;
+        if (inc > 0) {
+            if (totalSpend > inc) score += 0;
+            else if (savingsRate >= 25) score += 35;
+            else if (savingsRate >= 15) score += 25;
+            else if (savingsRate >= 5) score += 15;
+            else if (savingsRate > 0) score += 5;
+            else score += 2;
+        } else {
+            score += 15;
+        }
+
+        double totalBudget = budgets != null ? budgets.stream().mapToDouble(b -> b.getAllocatedAmount() != null ? b.getAllocatedAmount() : 0.0).sum() : 0.0;
+        if (totalBudget > 0) {
+            double util = (totalSpend / totalBudget) * 100.0;
+            if (util <= 85) score += 35;
+            else if (util <= 100) score += 25;
+            else if (util <= 115) score += 10;
+        } else {
+            score += 20;
+        }
+        score += 25;
+        score = Math.max(0, Math.min(100, score));
+
+        String status = score >= 80 ? "Excellent" : score >= 65 ? "Good" : score >= 50 ? "Fair" : "Needs Attention";
 
         return MlRecommendationResponseDTO.builder()
-                .healthScore(78)
-                .healthStatus("Good")
-                .savingsRate(22.5)
+                .healthScore(score)
+                .healthStatus(status)
+                .savingsRate(Math.round(savingsRate * 10.0) / 10.0)
                 .recommendations(recs)
-                .summaryInsights(List.of("Steady spending habits observed across essential categories."))
+                .summaryInsights(summaryInsights)
                 .build();
     }
 }
