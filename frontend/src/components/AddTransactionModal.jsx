@@ -12,6 +12,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [aiPrediction, setAiPrediction] = useState(null);
   const [isPredicting, setIsPredicting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const expenseCategories = [
     { id: 'food', label: 'Food & Dining' },
@@ -97,19 +98,26 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!description.trim() || !amount) return;
+    if (!description.trim() || !amount || isSubmitting) return;
 
-    onSave({
-      description,
-      merchant,
-      amount: parseFloat(amount),
-      category,
-      date,
-      type,
-      paymentMethod
-    });
+    try {
+      setIsSubmitting(true);
+      await onSave({
+        description,
+        merchant,
+        amount: parseFloat(amount),
+        category,
+        date,
+        type,
+        paymentMethod
+      });
+    } catch (err) {
+      // Error handled by parent
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -296,12 +304,12 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
 
           {/* Actions */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting} style={{ opacity: isSubmitting ? 0.7 : 1 }}>
               <Check size={16} />
-              <span>{editingTransaction ? 'Save Changes' : 'Record Transaction'}</span>
+              <span>{isSubmitting ? 'Recording...' : (editingTransaction ? 'Save Changes' : 'Record Transaction')}</span>
             </button>
           </div>
         </form>

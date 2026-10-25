@@ -99,10 +99,11 @@ export default function App() {
       }
       setIsAddModalOpen(false);
       setEditingTransaction(null);
-      loadAllData();
+      await loadAllData();
     } catch (err) {
       console.error('Save error', err);
       showToast('Error saving transaction. Check connection.', 'error');
+      throw err;
     }
   };
 
