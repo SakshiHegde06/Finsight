@@ -1,11 +1,17 @@
 const getBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  if (!envUrl) return 'http://localhost:8080/api';
-  let clean = envUrl.trim().replace(/\/+$/, '');
-  if (!clean.endsWith('/api')) {
-    clean += '/api';
+  if (envUrl && envUrl.trim().length > 0) {
+    let clean = envUrl.trim().replace(/\/+$/, '');
+    if (!clean.endsWith('/api')) {
+      clean += '/api';
+    }
+    return clean;
   }
-  return clean;
+  // Automatic fallback to deployed Render backend in production
+  if (import.meta.env.PROD) {
+    return 'https://finsight-backend-gd6a.onrender.com/api';
+  }
+  return 'http://localhost:8080/api';
 };
 
 const BASE_URL = getBaseUrl();
