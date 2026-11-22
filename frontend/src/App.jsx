@@ -209,14 +209,8 @@ export default function App() {
     }
   };
 
-  const handleLoadScreenshotData = () => {
-    updateLocalTransactions(SCREENSHOT_SAMPLE_TRANSACTIONS);
-    setMonthYear('2026-11');
-    showToast('Loaded demo dataset (Expenses: 11,867 • Income: 12,000)', 'success');
-  };
-
   const handleResetData = () => {
-    if (window.confirm('Are you sure you want to reset all transaction data to zero? You can reload sample data anytime.')) {
+    if (window.confirm('Are you sure you want to reset all transaction data to zero?')) {
       updateLocalTransactions([]);
       showToast('All transaction data has been reset to zero', 'success');
     }
@@ -559,27 +553,6 @@ export default function App() {
                 </select>
 
                 <button
-                  onClick={handleLoadScreenshotData}
-                  style={{
-                    background: '#fef3c7',
-                    border: '1px solid #fde68a',
-                    borderRadius: 10,
-                    padding: '8px 10px',
-                    fontSize: '0.76rem',
-                    fontWeight: 700,
-                    color: '#92400e',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4
-                  }}
-                  title="Reload demo data from screenshots"
-                >
-                  <Sparkles size={13} />
-                  <span>Sample Data</span>
-                </button>
-
-                <button
                   onClick={handleResetData}
                   style={{
                     background: '#fef2f2',
@@ -667,9 +640,6 @@ export default function App() {
             <ProfileTab
               savingsTarget={savingsTarget}
               onUpdateSavingsTarget={handleUpdateSavingsTarget}
-              onLoadScreenshotData={handleLoadScreenshotData}
-              onResetData={handleResetData}
-              transactionCount={transactions.length}
             />
           </div>
         </main>
