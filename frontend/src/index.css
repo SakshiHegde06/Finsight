@@ -308,49 +308,6 @@ h1, h2, h3, h4, h5, h6 {
   animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ==========================================================================
-   VIEW SWITCHER BAR (Toggle between Original Deployed & Money Tracker)
-   ========================================================================== */
-.view-mode-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: #1c1917;
-  color: #f3f4f6;
-  font-size: 0.78rem;
-  font-weight: 600;
-  z-index: 60;
-}
-
-.view-mode-pill {
-  display: inline-flex;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 3px;
-  border-radius: 9999px;
-  gap: 3px;
-}
-
-.view-mode-btn {
-  padding: 4px 12px;
-  border-radius: 9999px;
-  border: none;
-  font-size: 0.74rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.view-mode-btn.active {
-  background: #fecb2e;
-  color: #111827;
-}
-
-.view-mode-btn.inactive {
-  background: transparent;
-  color: #d1d5db;
-}
 
 /* ==========================================================================
    MONEY TRACKER APP SHELL STYLING (From Screenshots)
