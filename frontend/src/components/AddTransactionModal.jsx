@@ -105,13 +105,13 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!description.trim() || !amount || isSubmitting) return;
 
     try {
       setIsSubmitting(true);
-      await onSave({
+      onSave({
         description: description.trim(),
         merchant: merchant.trim(),
         amount: parseFloat(amount),

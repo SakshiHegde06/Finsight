@@ -153,37 +153,52 @@ export default function App() {
 
   const formatNumber = (num) => Math.round(num || 0).toLocaleString('en-IN');
 
-  // Add or Edit Transaction
-  const handleSaveTransaction = async (formData) => {
+  // Add or Edit Transaction (Instant Optimistic Save)
+  const handleSaveTransaction = (formData) => {
     try {
       if (editingTransaction) {
-        try {
-          await api.updateTransaction(editingTransaction.id, formData);
-        } catch (e) {
-          // fallback
-        }
         const updated = transactions.map(t => 
           t.id === editingTransaction.id ? { ...t, ...formData } : t
         );
         updateLocalTransactions(updated);
         showToast('Transaction updated successfully', 'success');
+
+        // Async sync to backend in background
+        api.updateTransaction(editingTransaction.id, formData).catch(err => {
+          console.warn('Backend update deferred:', err);
+        });
       } else {
-        const newId = `tx-${Date.now()}`;
-        const newTx = { ...formData, id: newId };
-        try {
-          const saved = await api.createTransaction(formData);
-          if (saved && saved.id) newTx.id = saved.id;
-          if (saved && saved.isAnomaly) {
-            newTx.isAnomaly = true;
-            newTx.anomalyReason = saved.anomalyReason;
-            showToast('Flagged as spending anomaly outlier', 'warning');
-          } else {
-            showToast('Transaction recorded successfully', 'success');
-          }
-        } catch (e) {
-          showToast('Transaction recorded', 'success');
-        }
+        const tempId = `tx-${Date.now()}`;
+        const newTx = { ...formData, id: tempId };
+
+        // 1. Immediately update UI & localStorage so user never waits
         updateLocalTransactions([newTx, ...transactions]);
+        showToast('Transaction recorded successfully', 'success');
+
+        // 2. Async sync to backend in background
+        api.createTransaction(formData)
+          .then(saved => {
+            if (saved && saved.id) {
+              setTransactions(prev => {
+                const mapped = prev.map(t => 
+                  t.id === tempId 
+                    ? { ...t, id: saved.id, isAnomaly: !!saved.isAnomaly, anomalyReason: saved.anomalyReason || '' } 
+                    : t
+                );
+                try {
+                  localStorage.setItem('finsight_user_transactions', JSON.stringify(mapped));
+                } catch (e) {}
+                return mapped;
+              });
+
+              if (saved.isAnomaly) {
+                showToast('AI Flag: Unusual spending spike detected', 'warning');
+              }
+            }
+          })
+          .catch(err => {
+            console.warn('Backend sync deferred (running in offline/optimistic mode):', err);
+          });
       }
       setIsAddModalOpen(false);
       setEditingTransaction(null);
