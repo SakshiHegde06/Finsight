@@ -281,6 +281,7 @@ class RecommenderService:
                     "message": f"Your current savings rate is {savings_rate}%. Setting up an automated recurring transfer of ₹{target_boost:,.0f} into an SIP or savings fund will push you toward the 20% benchmark standard.",
                     "potential_savings": target_boost,
                     "action": "Boost Monthly SIP"
+                })
             if total_expense > income:
                 deficit = total_expense - income
                 recommendations.insert(0, {
