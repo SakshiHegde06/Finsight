@@ -263,6 +263,10 @@ public class TransactionService {
             case "business": return "Business Income";
             case "bonus": return "Bonus & Grants";
             case "rental": return "Rental Income";
+            case "housing":
+            case "rent": return "Housing";
+            case "clothing": return "Clothing";
+            case "transportation": return "Transportation";
             case "food": return "Food & Dining";
             case "travel": return "Travel & Commute";
             case "shopping": return "Shopping";

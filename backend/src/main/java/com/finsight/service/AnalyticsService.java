@@ -216,16 +216,21 @@ public class AnalyticsService {
 
     private String getCategoryColor(String cat) {
         switch (cat.toLowerCase()) {
-            case "food": return "#f97316";
-            case "shopping": return "#ec4899";
-            case "travel": return "#06b6d4";
-            case "utilities": return "#eab308";
-            case "entertainment": return "#8b5cf6";
+            case "housing":
+            case "rent": return "#ff6b8b";
+            case "clothing": return "#fb923c";
+            case "food": return "#2ec4b6";
+            case "transportation":
+            case "travel": return "#f87171";
+            case "shopping": return "#f59e0b";
+            case "entertainment": return "#22c55e";
+            case "utilities": return "#38bdf8";
             case "healthcare": return "#ef4444";
             case "investment": return "#10b981";
+            case "salary": return "#10b981";
             case "emi": return "#6366f1";
             case "education": return "#3b82f6";
-            default: return "#64748b";
+            default: return "#94a3b8";
         }
     }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Check } from 'lucide-react';
+import { X, Sparkles, Check, Home, Shirt, Utensils, Bus, ShoppingCart, Gamepad2, Wallet, Zap, HeartPulse, MoreHorizontal } from 'lucide-react';
 import { api } from '../services/api';
+import { CATEGORY_DEFINITIONS } from '../data/screenshotDemoData';
 
 export default function AddTransactionModal({ isOpen, onClose, onSave, editingTransaction }) {
   const getTodayStr = () => {
@@ -16,9 +17,8 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
   const [description, setDescription] = useState('');
   const [merchant, setMerchant] = useState('');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('shopping');
+  const [category, setCategory] = useState('food');
   const [date, setDate] = useState(todayStr);
-  const [dateError, setDateError] = useState('');
   const [type, setType] = useState('EXPENSE');
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [aiPrediction, setAiPrediction] = useState(null);
@@ -26,50 +26,33 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const expenseCategories = [
-    { id: 'food', label: 'Food & Dining' },
-    { id: 'shopping', label: 'Shopping' },
-    { id: 'travel', label: 'Travel & Commute' },
-    { id: 'emi', label: 'Loan & EMI' },
-    { id: 'utilities', label: 'Utilities & Bills' },
-    { id: 'entertainment', label: 'Entertainment' },
-    { id: 'healthcare', label: 'Healthcare' },
-    { id: 'investment', label: 'Investments' },
-    { id: 'education', label: 'Education' },
-    { id: 'other', label: 'Other Expense' }
+    { id: 'housing', label: 'Housing / Rent', icon: <Home size={16} />, color: '#ff6b8b' },
+    { id: 'clothing', label: 'Clothing', icon: <Shirt size={16} />, color: '#fb923c' },
+    { id: 'food', label: 'Food & Dining', icon: <Utensils size={16} />, color: '#2ec4b6' },
+    { id: 'transportation', label: 'Transportation', icon: <Bus size={16} />, color: '#f87171' },
+    { id: 'shopping', label: 'Shopping', icon: <ShoppingCart size={16} />, color: '#f59e0b' },
+    { id: 'entertainment', label: 'Entertainment', icon: <Gamepad2 size={16} />, color: '#22c55e' },
+    { id: 'utilities', label: 'Utilities & Bills', icon: <Zap size={16} />, color: '#38bdf8' },
+    { id: 'healthcare', label: 'Healthcare', icon: <HeartPulse size={16} />, color: '#ef4444' },
+    { id: 'other', label: 'Other Expense', icon: <MoreHorizontal size={16} />, color: '#94a3b8' }
   ];
 
   const incomeCategories = [
-    { id: 'salary', label: 'Salary / Wages' },
-    { id: 'freelance', label: 'Freelance & Consulting' },
-    { id: 'investment', label: 'Investments & Dividends' },
-    { id: 'business', label: 'Business Income' },
-    { id: 'rental', label: 'Rental Income' },
-    { id: 'bonus', label: 'Bonus & Grants' },
-    { id: 'other', label: 'Other Income' }
+    { id: 'salary', label: 'Salary / Wages', icon: <Wallet size={16} />, color: '#10b981' },
+    { id: 'freelance', label: 'Freelance & Consulting', icon: <Wallet size={16} />, color: '#06b6d4' },
+    { id: 'bonus', label: 'Bonus / Extra', icon: <Wallet size={16} />, color: '#f59e0b' },
+    { id: 'other', label: 'Other Income', icon: <MoreHorizontal size={16} />, color: '#94a3b8' }
   ];
 
   const activeCategories = type === 'INCOME' ? incomeCategories : expenseCategories;
-
-  const paymentMethods = ['UPI', 'Credit Card', 'Net Banking', 'Debit Card', 'Cash'];
+  const paymentMethods = ['UPI', 'Cash', 'Credit Card', 'Net Banking', 'Debit Card'];
 
   const handleTypeChange = (newType) => {
     setType(newType);
     if (newType === 'INCOME') {
-      const isIncome = incomeCategories.some(c => c.id === category);
-      if (!isIncome) setCategory('salary');
+      setCategory('salary');
     } else {
-      const isExpense = expenseCategories.some(c => c.id === category);
-      if (!isExpense) setCategory('shopping');
-    }
-  };
-
-  const handleDateChange = (val) => {
-    if (val > todayStr) {
-      setDate(todayStr);
-      setDateError(`Transactions cannot be set in the future. Maximum date is today (${todayStr}).`);
-    } else {
-      setDate(val);
-      setDateError('');
+      setCategory('food');
     }
   };
 
@@ -78,27 +61,24 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
       setDescription(editingTransaction.description || '');
       setMerchant(editingTransaction.merchant || '');
       setAmount(editingTransaction.amount ? String(editingTransaction.amount) : '');
-      setCategory(editingTransaction.category || (editingTransaction.type === 'INCOME' ? 'salary' : 'shopping'));
-      const editDate = editingTransaction.date || todayStr;
-      setDate(editDate > todayStr ? todayStr : editDate);
+      setCategory(editingTransaction.category || (editingTransaction.type === 'INCOME' ? 'salary' : 'food'));
+      setDate(editingTransaction.date || todayStr);
       setType(editingTransaction.type || 'EXPENSE');
       setPaymentMethod(editingTransaction.paymentMethod || 'UPI');
       setAiPrediction(null);
-      setDateError('');
     } else {
       setDescription('');
       setMerchant('');
       setAmount('');
-      setCategory('shopping');
+      setCategory('food');
       setDate(todayStr);
       setType('EXPENSE');
       setPaymentMethod('UPI');
       setAiPrediction(null);
-      setDateError('');
     }
   }, [editingTransaction, isOpen]);
 
-  // Real-time AI preview debounced
+  // AI Real-time prediction debounced
   useEffect(() => {
     if (!description || description.trim().length < 3 || editingTransaction) return;
 
@@ -108,10 +88,13 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
         const res = await api.previewCategorize(description, merchant, parseFloat(amount) || 0);
         if (res && res.category) {
           setAiPrediction(res);
-          setCategory(res.category);
+          const mapped = res.category.toLowerCase();
+          if (activeCategories.some(c => c.id === mapped)) {
+            setCategory(mapped);
+          }
         }
       } catch (err) {
-        console.warn('AI preview not available', err);
+        // quiet ignore
       } finally {
         setIsPredicting(false);
       }
@@ -126,69 +109,65 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
     e.preventDefault();
     if (!description.trim() || !amount || isSubmitting) return;
 
-    if (date > todayStr) {
-      setDateError(`Transactions cannot be set in the future. Maximum allowed date is today (${todayStr}).`);
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       await onSave({
-        description,
-        merchant,
+        description: description.trim(),
+        merchant: merchant.trim(),
         amount: parseFloat(amount),
         category,
+        displayCategory: activeCategories.find(c => c.id === category)?.label || category,
         date,
         type,
         paymentMethod
       });
+      onClose();
     } catch (err) {
-      // Error handled by parent
+      console.error('Save failed', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        {/* Modal Header */}
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '20px 24px',
-          borderBottom: '1px solid var(--border-cream)',
-          background: 'var(--bg-cream-base)'
+          padding: '16px 20px',
+          background: 'var(--theme-yellow)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.08)'
         }}>
-          <div>
-            <h3 style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>
-              {editingTransaction ? 'Edit Transaction' : 'Record New Transaction'}
-            </h3>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              Automated classification and anomaly inspection
-            </p>
-          </div>
-          <button className="btn-icon" onClick={onClose}>
-            <X size={18} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
+            {editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
+          </h3>
+          <button 
+            onClick={onClose} 
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#111827' }}
+          >
+            <X size={20} />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-          {/* Transaction Type Radio */}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+        {/* Body */}
+        <form onSubmit={handleSubmit} style={{ padding: '20px' }}>
+          {/* Expense / Income Toggle */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
             <button
               type="button"
               onClick={() => handleTypeChange('EXPENSE')}
               style={{
                 flex: 1,
                 padding: '9px',
-                borderRadius: 'var(--radius-md)',
-                background: type === 'EXPENSE' ? 'var(--accent-crimson-soft)' : 'var(--bg-cream-soft)',
-                border: `1px solid ${type === 'EXPENSE' ? 'var(--accent-crimson)' : 'var(--border-cream)'}`,
-                color: type === 'EXPENSE' ? 'var(--accent-crimson-text)' : 'var(--text-secondary)',
+                borderRadius: 10,
+                background: type === 'EXPENSE' ? '#111827' : '#f3f4f6',
+                color: type === 'EXPENSE' ? 'var(--theme-yellow)' : '#4b5563',
+                border: 'none',
                 fontWeight: 700,
+                fontSize: '0.85rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
               }}
@@ -201,11 +180,12 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
               style={{
                 flex: 1,
                 padding: '9px',
-                borderRadius: 'var(--radius-md)',
-                background: type === 'INCOME' ? 'var(--accent-forest-soft)' : 'var(--bg-cream-soft)',
-                border: `1px solid ${type === 'INCOME' ? 'var(--accent-forest)' : 'var(--border-cream)'}`,
-                color: type === 'INCOME' ? 'var(--accent-forest-text)' : 'var(--text-secondary)',
+                borderRadius: 10,
+                background: type === 'INCOME' ? '#16a34a' : '#f3f4f6',
+                color: type === 'INCOME' ? '#ffffff' : '#4b5563',
+                border: 'none',
                 fontWeight: 700,
+                fontSize: '0.85rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
               }}
@@ -215,140 +195,171 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, editingTr
           </div>
 
           {/* Description */}
-          <div style={{ marginBottom: 16 }}>
-            <label className="input-label">Description / Transaction Text *</label>
+          <div style={{ marginBottom: 14 }}>
+            <label className="input-label">Title / Description *</label>
             <input
               type="text"
               className="input-field"
-              placeholder={type === 'INCOME' ? "e.g. Monthly Salary credit TCS, Freelance client transfer..." : "e.g. Uber ride to airport INR 650, Swiggy dinner..."}
+              placeholder={type === 'EXPENSE' ? "e.g. coffee, pg rent, grocery..." : "e.g. Monthly salary, freelance..."}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
+              autoFocus
             />
-            {/* AI Real-time Prediction Feedback */}
+
+            {/* AI Real-time keyword prediction */}
             {isPredicting ? (
-              <p style={{ fontSize: '0.72rem', color: 'var(--accent-purple)', marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Sparkles size={12} /> Analyzing text keywords...
-              </p>
+              <span style={{ fontSize: '0.72rem', color: '#8b5cf6', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Sparkles size={12} /> AI analyzing text...
+              </span>
             ) : aiPrediction ? (
               <div style={{
                 marginTop: 6,
-                padding: '6px 10px',
+                padding: '5px 8px',
                 borderRadius: 6,
-                background: 'var(--accent-purple-soft)',
-                border: '1px solid rgba(107, 33, 168, 0.2)',
-                fontSize: '0.75rem',
-                color: 'var(--accent-purple-text)',
+                background: '#f5f3ff',
+                fontSize: '0.72rem',
+                color: '#6d28d9',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6
+                gap: 5
               }}>
-                <Sparkles size={13} color="var(--accent-purple)" />
-                <span>AI Predicted: <strong>{aiPrediction.display_category || aiPrediction.category}</strong> ({(aiPrediction.confidence * 100).toFixed(0)}% confidence)</span>
+                <Sparkles size={12} />
+                <span>AI Predicted: <strong>{aiPrediction.display_category || aiPrediction.category}</strong></span>
               </div>
             ) : null}
           </div>
 
           {/* Amount and Merchant */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
             <div>
               <label className="input-label">Amount (INR) *</label>
-              <input
-                type="number"
-                step="any"
-                min="0.01"
-                className="input-field"
-                placeholder="e.g. 4850"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 12, top: 12, fontWeight: 700, color: '#6b7280' }}>₹</span>
+                <input
+                  type="number"
+                  step="any"
+                  min="0.01"
+                  className="input-field"
+                  placeholder="e.g. 75"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  style={{ paddingLeft: 28, fontWeight: 700 }}
+                  required
+                />
+              </div>
             </div>
+
             <div>
-              <label className="input-label">{type === 'INCOME' ? 'Source / Employer / Client' : 'Merchant / Payee'}</label>
+              <label className="input-label">Merchant / Payee</label>
               <input
                 type="text"
                 className="input-field"
-                placeholder={type === 'INCOME' ? "e.g. Employer Name, Client, Google" : "e.g. Swiggy, Netflix, Uber"}
+                placeholder="e.g. Cafe, Swiggy"
                 value={merchant}
                 onChange={(e) => setMerchant(e.target.value)}
               />
             </div>
           </div>
 
-          {/* Category and Date */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
-            <div>
-              <label className="input-label">Category</label>
-              <select
-                className="input-field"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {activeCategories.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+          {/* Category Picker with Visual Color Badges */}
+          <div style={{ marginBottom: 14 }}>
+            <label className="input-label">Category</label>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 8,
+              maxHeight: 140,
+              overflowY: 'auto',
+              padding: 2
+            }}>
+              {activeCategories.map((c) => {
+                const isSelected = category === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCategory(c.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      border: `1.5px solid ${isSelected ? c.color : '#e5e7eb'}`,
+                      background: isSelected ? `${c.color}15` : '#ffffff',
+                      color: isSelected ? '#111827' : '#4b5563',
+                      fontSize: '0.78rem',
+                      fontWeight: isSelected ? 700 : 500,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.12s ease'
+                    }}
+                  >
+                    <span style={{ color: c.color, display: 'flex' }}>
+                      {c.icon}
+                    </span>
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {c.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Date & Payment Method */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
             <div>
-              <label className="input-label">Date (Past or Today) *</label>
+              <label className="input-label">Date</label>
               <input
                 type="date"
                 className="input-field"
                 value={date}
-                max={todayStr}
-                onChange={(e) => handleDateChange(e.target.value)}
+                onChange={(e) => setDate(e.target.value)}
                 required
               />
-              {dateError ? (
-                <span style={{ fontSize: '0.72rem', color: '#DC2626', marginTop: 4, display: 'block', fontWeight: 500 }}>
-                  {dateError}
-                </span>
-              ) : (
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>
-                  Max allowed: Today ({todayStr})
-                </span>
-              )}
+            </div>
+
+            <div>
+              <label className="input-label">Payment Method</label>
+              <select
+                className="input-field"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                {paymentMethods.map(m => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Payment Method */}
-          <div style={{ marginBottom: 24 }}>
-            <label className="input-label">Payment Method</label>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {paymentMethods.map(m => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setPaymentMethod(m)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    background: paymentMethod === m ? '#1C1917' : 'var(--bg-cream-soft)',
-                    border: `1px solid ${paymentMethod === m ? '#1C1917' : 'var(--border-cream)'}`,
-                    color: paymentMethod === m ? '#FFFFFF' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {m}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Actions */}
+          {/* Action Buttons */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 10,
+                background: '#f3f4f6',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                color: '#4b5563',
+                cursor: 'pointer'
+              }}
+            >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting} style={{ opacity: isSubmitting ? 0.7 : 1 }}>
+            <button
+              type="submit"
+              className="btn-yellow"
+              disabled={isSubmitting}
+            >
               <Check size={16} />
-              <span>{isSubmitting ? 'Recording...' : (editingTransaction ? 'Save Changes' : 'Record Transaction')}</span>
+              <span>{isSubmitting ? 'Saving...' : (editingTransaction ? 'Save Changes' : 'Record Transaction')}</span>
             </button>
           </div>
         </form>

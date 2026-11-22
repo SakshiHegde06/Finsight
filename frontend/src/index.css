@@ -1,10 +1,12 @@
-/* FinSight Luxury Cream & Warm Slate Fintech Design System */
+/* ==========================================================================
+   FinSight Fintech Design System (Supporting Original Deployed & Money Tracker)
+   ========================================================================== */
 :root {
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Warm Cream & Sand Luxury Palette */
+  /* --- 1. Original Luxury Cream & Warm Slate Palette --- */
   --bg-cream-base: #FAF8F5;
   --bg-cream-soft: #F4F1EA;
   --bg-cream-card: #FFFFFF;
@@ -12,43 +14,39 @@
   --bg-cream-hover: #F8F5EE;
   --bg-cream-inset: #F2EFE7;
   
-  /* Borders */
   --border-cream: #E7E3D8;
   --border-subtle: rgba(28, 25, 23, 0.08);
   --border-focus: #1C1917;
 
-  /* Typography Colors */
-  --text-primary: #1C1917;     /* Deep Espresso Slate */
-  --text-secondary: #57534E;   /* Muted Slate */
-  --text-muted: #857F77;       /* Soft Sand Muted */
+  --text-primary: #1C1917;
+  --text-secondary: #57534E;
+  --text-muted: #857F77;
   --text-inverted: #FFFFFF;
 
-  /* Refined FinTech Accents */
-  --accent-forest: #166534;    /* Success / Savings */
+  --accent-forest: #166534;
   --accent-forest-soft: #DCFCE7;
   --accent-forest-text: #14532D;
 
-  --accent-terracotta: #C2410C;/* Anomaly / Spike */
+  --accent-terracotta: #C2410C;
   --accent-terracotta-soft: #FFEDD5;
   --accent-terracotta-text: #9A3412;
 
-  --accent-crimson: #BE123C;   /* Overbudget / Deficit */
+  --accent-crimson: #BE123C;
   --accent-crimson-soft: #FFE4E6;
   --accent-crimson-text: #9F1239;
 
-  --accent-navy: #1E3A8A;      /* Primary Bank / Trust */
+  --accent-navy: #1E3A8A;
   --accent-navy-soft: #DBEAFE;
   --accent-navy-text: #1E40AF;
 
-  --accent-amber: #B45309;     /* Caution / Alert */
+  --accent-amber: #B45309;
   --accent-amber-soft: #FEF3C7;
   --accent-amber-text: #92400E;
 
-  --accent-purple: #6B21A8;    /* AI / Predictions */
+  --accent-purple: #6B21A8;
   --accent-purple-soft: #F3E8FF;
   --accent-purple-text: #581C87;
 
-  /* Shadows */
   --shadow-subtle: 0 1px 3px rgba(28, 25, 23, 0.04), 0 1px 2px rgba(28, 25, 23, 0.03);
   --shadow-card: 0 4px 20px -2px rgba(44, 38, 34, 0.06), 0 2px 6px -1px rgba(44, 38, 34, 0.03);
   --shadow-hover: 0 12px 30px -4px rgba(44, 38, 34, 0.09), 0 4px 10px -2px rgba(44, 38, 34, 0.04);
@@ -60,6 +58,23 @@
   --radius-lg: 18px;
   --radius-xl: 24px;
   --radius-full: 9999px;
+
+  /* --- 2. Money Tracker Yellow Theme --- */
+  --theme-yellow: #fecb2e;
+  --theme-yellow-light: #fff3c4;
+  --theme-yellow-hover: #f5be18;
+  --theme-yellow-deep: #e5b012;
+
+  --cat-housing: #ff6b8b;
+  --cat-clothing: #fb923c;
+  --cat-food: #2ec4b6;
+  --cat-transportation: #f87171;
+  --cat-shopping: #f59e0b;
+  --cat-entertainment: #22c55e;
+  --cat-utilities: #38bdf8;
+  --cat-healthcare: #ef4444;
+  --cat-salary: #10b981;
+  --cat-other: #94a3b8;
 }
 
 * {
@@ -75,7 +90,15 @@ body {
   background-color: var(--bg-cream-base);
   color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   ORIGINAL DEPLOYED DASHBOARD STYLING
+   ========================================================================== */
+.original-dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-image: 
     radial-gradient(circle at 10% 10%, rgba(231, 227, 216, 0.45) 0%, transparent 50%),
     radial-gradient(circle at 90% 15%, rgba(223, 215, 199, 0.35) 0%, transparent 45%),
@@ -83,23 +106,6 @@ body {
   background-attachment: fixed;
 }
 
-/* Elegant Scrollbars */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-cream-soft);
-}
-::-webkit-scrollbar-thumb {
-  background: #D6D0C2;
-  border-radius: var(--radius-full);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #BDB6A6;
-}
-
-/* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 700;
@@ -111,17 +117,12 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-mono);
 }
 
-/* Luxury Cards */
 .glass-card {
   background: var(--bg-cream-card);
   border: 1px solid var(--border-cream);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-card-interactive {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .glass-card-interactive:hover {
@@ -307,17 +308,447 @@ h1, h2, h3, h4, h5, h6 {
   animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ==========================================================================
+   VIEW SWITCHER BAR (Toggle between Original Deployed & Money Tracker)
+   ========================================================================== */
+.view-mode-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #1c1917;
+  color: #f3f4f6;
+  font-size: 0.78rem;
+  font-weight: 600;
+  z-index: 60;
+}
+
+.view-mode-pill {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 3px;
+  border-radius: 9999px;
+  gap: 3px;
+}
+
+.view-mode-btn {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: none;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-mode-btn.active {
+  background: #fecb2e;
+  color: #111827;
+}
+
+.view-mode-btn.inactive {
+  background: transparent;
+  color: #d1d5db;
+}
+
+/* ==========================================================================
+   MONEY TRACKER APP SHELL STYLING (From Screenshots)
+   ========================================================================== */
+.app-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #edf0f2;
+}
+
+.mobile-app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.1);
+  padding-bottom: 78px;
+}
+
+@media (min-width: 768px) {
+  .mobile-app-shell {
+    margin: 16px auto;
+    min-height: calc(100vh - 80px);
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+}
+
+.money-header-yellow {
+  background: var(--theme-yellow);
+  padding: 16px 18px 18px 18px;
+  color: #1c1917;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.header-title-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #111827;
+}
+
+.header-stats-grid {
+  display: grid;
+  grid-template-columns: 88px 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.month-picker-pill {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.stat-amount {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* Savings Target Card */
+.savings-target-card {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fde68a;
+  border-radius: 16px;
+  margin: 14px 16px 8px 16px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+}
+
+/* Ledger & Rows */
+.day-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 8px 18px;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.tx-row:hover {
+  background-color: #fafaf9;
+}
+
+.tx-category-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.tx-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-desc {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+}
+
+.tx-sub-info {
+  font-size: 0.74rem;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.tx-amount {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tx-amount.expense {
+  color: #1f2937;
+}
+
+.tx-amount.income {
+  color: #10b981;
+}
+
+/* Charts Tab */
+.charts-toggle-pill {
+  display: inline-flex;
+  background: var(--theme-yellow);
+  border: 1.5px solid #111827;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.charts-toggle-btn {
+  padding: 6px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.charts-toggle-btn.active {
+  background: #111827;
+  color: var(--theme-yellow);
+}
+
+.charts-toggle-btn.inactive {
+  background: var(--theme-yellow);
+  color: #111827;
+}
+
+.period-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
+  padding: 0 10px;
+  overflow-x: auto;
+}
+
+.period-tab-item {
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2.5px solid transparent;
+}
+
+.period-tab-item.active {
+  color: #111827;
+  font-weight: 700;
+  border-bottom-color: var(--theme-yellow);
+}
+
+.chart-carousel-card {
+  padding: 18px 18px 12px 18px;
+  background: #ffffff;
+  border-bottom: 8px solid #f8f9fa;
+}
+
+.carousel-indicators {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.carousel-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d1d5db;
+  cursor: pointer;
+}
+
+.carousel-dot.active {
+  width: 8px;
+  height: 8px;
+  background: #111827;
+}
+
+.cat-progress-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.cat-progress-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 14px;
+}
+
+.cat-progress-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.cat-progress-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.cat-progress-amount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.cat-progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.cat-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.cat-progress-pct {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* Bottom Nav */
+.app-bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background: #ffffff;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 40;
+}
+
+.nav-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.nav-tab-btn.active {
+  color: #f59e0b;
+}
+
+.nav-fab-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--theme-yellow);
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(254, 203, 46, 0.65);
+  margin-top: -24px;
+}
+
+.btn-yellow {
+  background: var(--theme-yellow);
+  color: #111827;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.anomaly-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
 }
