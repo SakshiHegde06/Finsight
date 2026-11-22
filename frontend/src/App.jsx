@@ -24,7 +24,10 @@ import {
   Wallet,
   PiggyBank,
   Sparkles,
-  Check
+  Check,
+  RotateCcw,
+  Calendar,
+  X
 } from 'lucide-react';
 
 const SAVINGS_TARGET_STORAGE_KEY = 'finsight_savings_target';
@@ -213,9 +216,9 @@ export default function App() {
   };
 
   const handleResetData = () => {
-    if (window.confirm('Clear all transaction records?')) {
+    if (window.confirm('Are you sure you want to reset all transaction data to zero? You can reload sample data anytime.')) {
       updateLocalTransactions([]);
-      showToast('Transactions cleared', 'success');
+      showToast('All transaction data has been reset to zero', 'success');
     }
   };
 
@@ -223,7 +226,8 @@ export default function App() {
     { value: '2026-11', label: 'November 2026' },
     { value: '2026-10', label: 'October 2026' },
     { value: '2026-09', label: 'September 2026' },
-    { value: '2026-08', label: 'August 2026' }
+    { value: '2026-08', label: 'August 2026' },
+    { value: '2026-07', label: 'July 2026' }
   ];
 
   return (
@@ -308,17 +312,18 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Header Actions */}
+          {/* Header Action Buttons (Select Month, Reset Data, Add Transaction) */}
           <div className="header-actions">
-            {/* Month Picker Dropdown */}
+            {/* 1. SELECT MONTH BUTTON & POPUP */}
             <div style={{ position: 'relative' }}>
               <button 
                 onClick={() => setShowMonthDropdown(!showMonthDropdown)}
                 className="btn-secondary"
-                style={{ background: '#ffffff', borderColor: '#e2e8f0' }}
+                style={{ background: '#ffffff', borderColor: '#e2e8f0', fontWeight: 700 }}
+                title="Select month"
               >
-                <CalendarDays size={15} color="#b45309" />
-                <span>{monthOptions.find(o => o.value === monthYear)?.label || monthYear}</span>
+                <CalendarDays size={16} color="#b45309" strokeWidth={2.2} />
+                <span>Select Month: {monthOptions.find(o => o.value === monthYear)?.label || monthYear}</span>
                 <ChevronDown size={14} />
               </button>
 
@@ -330,38 +335,80 @@ export default function App() {
                   marginTop: 6,
                   background: '#ffffff',
                   border: '1px solid #e2e8f0',
-                  borderRadius: 14,
-                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-                  zIndex: 60,
-                  width: 180,
-                  padding: 6
+                  borderRadius: 16,
+                  boxShadow: '0 12px 28px rgba(0, 0, 0, 0.18)',
+                  zIndex: 70,
+                  width: 240,
+                  padding: 12
                 }}>
-                  {monthOptions.map(m => (
-                    <div
-                      key={m.value}
-                      onClick={() => { setMonthYear(m.value); setShowMonthDropdown(false); }}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: 8,
-                        fontSize: '0.84rem',
-                        fontWeight: monthYear === m.value ? 700 : 500,
-                        background: monthYear === m.value ? '#fef3c7' : 'transparent',
-                        color: monthYear === m.value ? '#92400e' : '#334155',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                      Pick Month &amp; Year
+                    </span>
+                    <button 
+                      onClick={() => setShowMonthDropdown(false)} 
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
                     >
-                      <span>{m.label}</span>
-                      {monthYear === m.value && <Check size={14} color="#f59e0b" />}
-                    </div>
-                  ))}
+                      <X size={15} />
+                    </button>
+                  </div>
+
+                  {/* Native Month Input */}
+                  <div style={{ marginBottom: 10 }}>
+                    <input
+                      type="month"
+                      className="input-field"
+                      value={monthYear}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setMonthYear(e.target.value);
+                          setShowMonthDropdown(false);
+                        }
+                      }}
+                      style={{ fontSize: '0.85rem', fontWeight: 700, padding: '8px 10px' }}
+                    />
+                  </div>
+
+                  {/* Quick Select Options */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 180, overflowY: 'auto' }}>
+                    {monthOptions.map(m => (
+                      <div
+                        key={m.value}
+                        onClick={() => { setMonthYear(m.value); setShowMonthDropdown(false); }}
+                        style={{
+                          padding: '7px 10px',
+                          borderRadius: 8,
+                          fontSize: '0.82rem',
+                          fontWeight: monthYear === m.value ? 700 : 500,
+                          background: monthYear === m.value ? '#fef3c7' : 'transparent',
+                          color: monthYear === m.value ? '#92400e' : '#334155',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <span>{m.label}</span>
+                        {monthYear === m.value && <Check size={14} color="#f59e0b" strokeWidth={2.5} />}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Add Transaction Button */}
+            {/* 2. RESET DATA BUTTON */}
+            <button 
+              onClick={handleResetData}
+              className="btn-secondary"
+              style={{ background: '#ffffff', color: '#b91c1c', borderColor: '#fecaca', fontWeight: 700 }}
+              title="Reset all transaction data"
+            >
+              <RotateCcw size={15} color="#dc2626" strokeWidth={2.4} />
+              <span>Reset Data</span>
+            </button>
+
+            {/* 3. ADD TRANSACTION BUTTON */}
             <button 
               className="btn-yellow"
               onClick={() => { setEditingTransaction(null); setIsAddModalOpen(true); }}
@@ -384,6 +431,7 @@ export default function App() {
           totalIncome={totalIncome}
           balance={balance}
           onOpenMenu={() => setActiveTab('profile')}
+          onResetData={handleResetData}
         />
       </div>
 
@@ -445,10 +493,10 @@ export default function App() {
       </div>
 
       {/* ==========================================================================
-          4. MAIN VIEW LOGIC
+          4. MAIN VIEW CONTENT
           ========================================================================== */}
       
-      {/* --- TAB 1: HOME (On PC: 2 Columns with Ledger + Visualizer side-by-side) --- */}
+      {/* --- TAB 1: HOME (Ledger on Left, Visualizer on Right on PC) --- */}
       {activeTab === 'home' && (
         <main className="desktop-main-grid">
           {/* Left Column: Transaction Activity & Ledger */}
@@ -464,7 +512,7 @@ export default function App() {
               />
             </div>
 
-            {/* Filter and Search Bar */}
+            {/* Filter, Search Bar, and Quick Reset / Reload Action Row */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -478,12 +526,12 @@ export default function App() {
                   Transaction Ledger
                 </h3>
                 <p style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                  Grouped by day with automatic category colors
+                  {filteredTransactions.length} records • Grouped by date with category icons
                 </p>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', width: 200 }}>
+                <div style={{ position: 'relative', width: 180 }}>
                   <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: 10, top: 11 }} />
                   <input
                     type="text"
@@ -491,7 +539,7 @@ export default function App() {
                     placeholder="Search expenses..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: 32, height: 36, fontSize: '0.82rem' }}
+                    style={{ paddingLeft: 30, height: 36, fontSize: '0.82rem' }}
                   />
                 </div>
 
@@ -499,7 +547,7 @@ export default function App() {
                   className="input-field"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  style={{ width: 140, height: 36, fontSize: '0.82rem', padding: '6px 10px' }}
+                  style={{ width: 130, height: 36, fontSize: '0.82rem', padding: '6px 8px' }}
                 >
                   <option value="all">All Categories</option>
                   <option value="housing">Housing</option>
@@ -509,6 +557,48 @@ export default function App() {
                   <option value="shopping">Shopping</option>
                   <option value="entertainment">Entertainment</option>
                 </select>
+
+                <button
+                  onClick={handleLoadScreenshotData}
+                  style={{
+                    background: '#fef3c7',
+                    border: '1px solid #fde68a',
+                    borderRadius: 10,
+                    padding: '8px 10px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    color: '#92400e',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                  title="Reload demo data from screenshots"
+                >
+                  <Sparkles size={13} />
+                  <span>Sample Data</span>
+                </button>
+
+                <button
+                  onClick={handleResetData}
+                  style={{
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: 10,
+                    padding: '8px 10px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    color: '#dc2626',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                  title="Reset data to zero"
+                >
+                  <RotateCcw size={13} />
+                  <span>Reset Data</span>
+                </button>
               </div>
             </div>
 
@@ -538,7 +628,7 @@ export default function App() {
         </main>
       )}
 
-      {/* --- TAB 2: CHARTS TAB (Full screen when clicked from nav) --- */}
+      {/* --- TAB 2: CHARTS TAB (Full view when navigated) --- */}
       {activeTab === 'charts' && (
         <main style={{ maxWidth: 1000, width: '100%', margin: '24px auto', padding: '0 24px' }}>
           <div className="desktop-panel">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, CalendarDays, ChevronDown, Check } from 'lucide-react';
+import { Menu, CalendarDays, ChevronDown, Check, RotateCcw, X, Calendar } from 'lucide-react';
 
 export default function MoneyTrackerHeader({ 
   monthYear, 
@@ -8,31 +8,32 @@ export default function MoneyTrackerHeader({
   totalIncome = 0, 
   balance = 0,
   onOpenMenu,
-  onOpenCalendar
+  onResetData
 }) {
-  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [showMonthModal, setShowMonthModal] = useState(false);
 
-  // Format currency with standard Indian numbering (11,867 or 12,000)
+  // Format currency
   const formatNumber = (num) => {
     return Math.round(num || 0).toLocaleString('en-IN');
   };
 
-  // Generate recent 12 months for picker
+  // Recent 12 months list
   const monthOptions = Array.from({ length: 12 }, (_, i) => {
     const d = new Date();
     d.setMonth(d.getMonth() - i);
     const year = d.getFullYear();
     const monthNum = String(d.getMonth() + 1).padStart(2, '0');
     const shortMonth = d.toLocaleString('en-US', { month: 'short' });
+    const fullMonth = d.toLocaleString('en-US', { month: 'long' });
     return {
       value: `${year}-${monthNum}`,
       year,
       month: shortMonth,
-      label: `${year} ${shortMonth}`
+      label: `${fullMonth} ${year}`
     };
   });
 
-  // Extract year and month name from current monthYear
+  // Extract year and month name
   let currentYear = '2026';
   let currentMonthName = 'Nov';
   try {
@@ -48,7 +49,7 @@ export default function MoneyTrackerHeader({
 
   return (
     <header className="money-header-yellow">
-      {/* Top row: Menu, Title, Calendar */}
+      {/* Top row: Menu, Title, Action Buttons */}
       <div className="header-top-row">
         <button 
           onClick={onOpenMenu}
@@ -73,32 +74,61 @@ export default function MoneyTrackerHeader({
           </span>
         </div>
 
-        <button 
-          onClick={() => {
-            setShowMonthDropdown(!showMonthDropdown);
-            if (onOpenCalendar) onOpenCalendar();
-          }}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 4,
-            display: 'flex',
-            alignItems: 'center',
-            color: '#111827'
-          }}
-          title="Calendar Month Selector"
-        >
-          <CalendarDays size={24} strokeWidth={2.2} />
-        </button>
+        {/* Right Top Buttons: Reset Data & Calendar Month Selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {onResetData && (
+            <button
+              onClick={onResetData}
+              style={{
+                background: 'rgba(255, 255, 255, 0.4)',
+                border: '1px solid rgba(0, 0, 0, 0.08)',
+                borderRadius: 8,
+                padding: '5px 8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: '#111827'
+              }}
+              title="Reset all data"
+            >
+              <RotateCcw size={13} color="#991b1b" strokeWidth={2.4} />
+              <span>Reset</span>
+            </button>
+          )}
+
+          <button 
+            onClick={() => setShowMonthModal(true)}
+            style={{
+              background: 'rgba(255, 255, 255, 0.4)',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              borderRadius: 8,
+              padding: '5px 8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: '#111827'
+            }}
+            title="Select Month"
+          >
+            <CalendarDays size={14} strokeWidth={2.4} />
+            <span>Month</span>
+          </button>
+        </div>
       </div>
 
       {/* Financial Summary Grid (Month Picker, Expenses, Income, Balance) */}
-      <div className="header-stats-grid" style={{ position: 'relative' }}>
+      <div className="header-stats-grid">
         {/* Month Selector Pill */}
         <div 
           className="month-picker-pill"
-          onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+          onClick={() => setShowMonthModal(true)}
+          title="Click to select month"
         >
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', lineHeight: 1 }}>
             {currentYear}
@@ -130,56 +160,84 @@ export default function MoneyTrackerHeader({
             {formatNumber(balance)}
           </span>
         </div>
-
-        {/* Month Dropdown Popup */}
-        {showMonthDropdown && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            marginTop: 8,
-            zIndex: 60,
-            background: '#ffffff',
-            borderRadius: 14,
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e5e7eb',
-            padding: 8,
-            width: 170,
-            maxHeight: 240,
-            overflowY: 'auto'
-          }}>
-            <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#9ca3af', padding: '4px 8px', textTransform: 'uppercase' }}>
-              Select Month
-            </p>
-            {monthOptions.map((opt) => (
-              <div
-                key={opt.value}
-                onClick={() => {
-                  setMonthYear(opt.value);
-                  setShowMonthDropdown(false);
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '7px 10px',
-                  borderRadius: 8,
-                  fontSize: '0.85rem',
-                  fontWeight: monthYear === opt.value ? 700 : 500,
-                  color: monthYear === opt.value ? '#111827' : '#4b5563',
-                  background: monthYear === opt.value ? '#fef3c7' : 'transparent',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.15s ease'
-                }}
-              >
-                <span>{opt.label}</span>
-                {monthYear === opt.value && <Check size={14} color="#f59e0b" strokeWidth={2.5} />}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* Select Month Modal / Dialog */}
+      {showMonthModal && (
+        <div className="modal-overlay" onClick={() => setShowMonthModal(false)}>
+          <div 
+            className="modal-content" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: 360, padding: 20 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Calendar size={18} color="#b45309" strokeWidth={2.4} />
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#111827' }}>
+                  Select Month &amp; Year
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowMonthModal(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Custom Month Picker Input */}
+            <div style={{ marginBottom: 16 }}>
+              <label className="input-label">Pick Any Month</label>
+              <input
+                type="month"
+                className="input-field"
+                value={monthYear}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setMonthYear(e.target.value);
+                    setShowMonthModal(false);
+                  }
+                }}
+                style={{ fontSize: '1rem', fontWeight: 700, padding: '10px 14px' }}
+              />
+            </div>
+
+            {/* Quick Month Select List */}
+            <div>
+              <label className="input-label">Quick Select</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
+                {monthOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setMonthYear(opt.value);
+                      setShowMonthModal(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '9px 12px',
+                      borderRadius: 10,
+                      background: monthYear === opt.value ? '#fef3c7' : '#f8fafc',
+                      border: `1px solid ${monthYear === opt.value ? '#fde68a' : '#e2e8f0'}`,
+                      fontSize: '0.85rem',
+                      fontWeight: monthYear === opt.value ? 700 : 500,
+                      color: monthYear === opt.value ? '#92400e' : '#334155',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span>{opt.label}</span>
+                    {monthYear === opt.value && <Check size={16} color="#d97706" strokeWidth={2.5} />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
-
